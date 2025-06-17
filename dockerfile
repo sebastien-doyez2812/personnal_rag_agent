@@ -6,4 +6,6 @@ COPY . .
 
 RUN pip install -r requirements.txt
 
-CMD ["python", "app.py"]
+
+# Populate the vector DB if need:
+CMD ["sh", "-c", "python populate_vectordb.py && python app.py"]
