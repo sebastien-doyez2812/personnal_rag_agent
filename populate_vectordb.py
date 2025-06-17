@@ -12,7 +12,6 @@ load_dotenv()
 FOLDER_DOCS = "data\docs_only"
 COLLECTIONS = ["document_only", "image_only"]
 
-
 # Get the Url and API for qdrant, from the .env file:
 qdrant_url = os.getenv("QDRANT_URL")
 qdrant_api_key = os.getenv("QDRANT_API_KEY")
@@ -22,6 +21,10 @@ qdrant_client = QdrantClient(
     api_key=qdrant_api_key
 )
 
+
+#qdrant_client.delete_collection(collection_name="document_only")
+#qdrant_client.delete_collection(collection_name="image_only")
+                                
 # Tokenizer and Embedding:
 tokenizer = AutoTokenizer.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
 model = TFAutoModel.from_pretrained("sentence-transformers/all-MiniLM-L6-v2")
@@ -31,6 +34,9 @@ def embedding(text):
     tokens = tokenizer(text, return_tensors = "tf", truncation = True, padding = True)
     output = model(**tokens)
     embedding = tf.reduce_mean(output.last_hidden_state, axis = 1)
+    
+    # embedding is (1,384), need to put it in 384 dim
+    embedding = tf.squeeze(embedding, axis= 0)
     return embedding.numpy().tolist()
 
 def extract_text_from_pdf(pdf_path):
@@ -48,7 +54,7 @@ try:
             print(f"\033[93m Create collection {collection} \033[0m")
             qdrant_client.create_collection(
                 collection_name="document_only",
-                vectors_config = models.VectorParams(size=1024, distance = models.Distance.COSINE)
+                vectors_config = models.VectorParams(size=384, distance = models.Distance.COSINE)
             )
             print(f"\033[92m Collection {collection} created! \033[0m")
         else:
