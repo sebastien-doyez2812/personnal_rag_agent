@@ -1,13 +1,21 @@
-# import requests 
+import langgraph
+import gradio
+from langchain_ollama import ollama
+from langchain_core.messages import AnyMessage
+from langgraph.graph.message import add_messages
+from typing import Annotated, Optional
+from typing_extensions import TypedDict
 
-# def main():
-#     rep = requests.post(
-#         url= "http://localhost:11434/api/embed",
-#         json={"model": "nomic-embed-text",
-#               "input": "Hello"}
-#     )
-#     data =rep.json()
-#     print(data)
+class State(TypedDict):
+    # Question:
+    question: str
 
-# if __name__ == "__main__":
-#     main()
+    # data:
+    data_from_vectordb: Optional[str]
+    data_from_web : Optional[str]
+
+    # Message:
+    messages: Annotated[list[AnyMessage], add_messages]
+
+
+
