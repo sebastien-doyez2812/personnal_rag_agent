@@ -2,19 +2,24 @@ import gradio, os
 from langchain_ollama import ChatOllama
 from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
-from typing import Annotated, Optional
+from typing import Annotated, Optional, Dict, Any
 from typing_extensions import TypedDict
 from langchain_core.tools import tool
 from dotenv import load_dotenv
 from qdrant_client import QdrantClient, models
 from qdrant_client.models import PointStruct
 from transformers import AutoTokenizer, TFAutoModel
+from langchain_core.messages import AnyMessage, SystemMessage, HumanMessage
+from langgraph.graph import StateGraph, START, END
 import tensorflow as tf
+
+
 
 #######################################
 ##           VECTORDB Qdrant         ##
 #######################################
-
+# Thresolhd similarity vector db:
+THRESHOLD = 0.85
 
 load_dotenv()
 qdrant_url = os.getenv("QDRANT_URL")
@@ -39,52 +44,86 @@ def embedding(text):
 
 
 class State(TypedDict):
-    # Question:
-    question: str
+    query: str
+    not_in_db: bool
 
-    # data:
-    data_from_vectordb: Optional[str]
-    data_from_web : Optional[str]
-
+    data_to_used: Dict[str, Any]
     # Message:
     messages: Annotated[list[AnyMessage], add_messages]
 
+    answer: str
 
 #########################################
-##               Tools:                ##
+##               Nodes:                ##
 #########################################
-@tool
-def search_in_vectordb(query, collection_name = "document_only", top_k = 5):
+
+def search_in_vectordb(state: State, collection_name = "document_only", top_k = 5):
+    query = state["query"]
     vector = embedding(query)
     result = qdrant_client.search(
         collection_name= collection_name,
         query_vector= vector,
         limit = top_k
     )
-    return result
 
-@tool
+    if result["score"] > THRESHOLD : 
+        return {
+            "data_to_used" : result,
+            "not_in_db" : False
+        }
+    else: 
+        return {
+            "not_in_db" : True
+        }
+
+#@tool
 def search_on_web():
     pass
 
-tools = [search_in_vectordb,
-         search_on_web]
+def assistant_answer(state: State):
+    prompt = f"""
+  As a helpful agent, which provide answer to the user 's question: {state["question"]}. 
+  Use this data to answer correctly :{state["data_to_used"]}
+  YOUR FINAL ANSWER MUST STRICTLY FOLLW THOSE RULES:
+    - be the most ACCURATE as possible
+    """
 
+    message = [HumanMessage(content=prompt)]
+    result = llm.invoke(message)
+
+    return {
+        "answer" : result
+    }
+
+
+# Edge:
+def route_answer(state: State) -> str:
+    if state["not_in_db"]:
+        return "web_research"
+    else: 
+        return "in_vectordb"
 ##########################################
 ##                 LLM                  ##
 ##########################################
 
 llm = ChatOllama(model="qwen2.5")
-llm_with_tools = llm.bind_tools(tools= tools)
+
+email_graph = StateGraph(State)
+
+email_graph.add_node("search_in_vectordb", search_in_vectordb )
+email_graph.add_node("web_search", search_on_web)
 
 def assistant():
-    system_prompt = SystemPrompt(content="System prompt:" \
-    "You are a helpful agent, which provide answer to the user 's question." \
-    "   Answer to this question: {state["question"]}. "
-    "YOUR FINAL ANSWER MUST STRICTLY FOLLW THOSE RULES:" \
-    "- firstly, use the tool search_in_vectordb to ask the vectordatabse if there are elements about the topics of the question in the vectordatabase." \
-    "- If there are nothing interresting in the vectordatabase, use the tool search_on_web to search inforsmation on the web" \
-    "- Be the most accurate as possible to the question" \
+    system_prompt = SystemMessage(content="""
+                                  System prompt: 
+                                  You are a helpful agent, which provide answer to the user 's question.
+                                   Answer to this question: {state["question"]}. YOUR FINAL ANSWER MUST STRICTLY FOLLW THOSE RULES:
+                                  - firstly, use the tool search_in_vectordb to ask the vectordatabse if there are elements about the topics of the question in the vectordatabase.
+    - If there are nothing interresting in the vectordatabase, use the tool search_on_web to search inforsmation on the web
+    - Be the most accurate as possible to the question
+                                  """
     )
     answer = llm_with_tools.invoke([system_prompt] + state["messages"])
 
+if __name__ == "__main__":
+    print(search_in_vectordb("Yankee"))
