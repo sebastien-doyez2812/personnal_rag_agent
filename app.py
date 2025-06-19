@@ -108,8 +108,19 @@ def route_answer(state: State) -> str:
 
 llm = ChatOllama(model="qwen2.5")
 
-email_graph = StateGraph(State)
+rag_graph = StateGraph(State)
 
-email_graph.add_node("search_in_vectordb", search_in_vectordb )
-email_graph.add_node("web_search", search_on_web)
-email_graph.add_node("agent_answer", assistant_answer)
+rag_graph.add_node("search_in_vectordb", search_in_vectordb )
+rag_graph.add_node("web_search", search_on_web)
+rag_graph.add_node("agent_answer", assistant_answer)
+
+
+rag_graph.add_edge(START, "search_in_vectordb")
+rag_graph.add_conditional_edges("search_in_vectordb", route_answer,
+                                  {
+                                      "web_research": "web_search",
+                                      "in_vectordb": "agent_answer"
+                                  })
+rag_graph.add_edge("web_search", "agent_answer")
+rag_graph.add_edge("agent_answer", END)
+
