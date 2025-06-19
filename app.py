@@ -112,18 +112,4 @@ email_graph = StateGraph(State)
 
 email_graph.add_node("search_in_vectordb", search_in_vectordb )
 email_graph.add_node("web_search", search_on_web)
-
-def assistant():
-    system_prompt = SystemMessage(content="""
-                                  System prompt: 
-                                  You are a helpful agent, which provide answer to the user 's question.
-                                   Answer to this question: {state["question"]}. YOUR FINAL ANSWER MUST STRICTLY FOLLW THOSE RULES:
-                                  - firstly, use the tool search_in_vectordb to ask the vectordatabse if there are elements about the topics of the question in the vectordatabase.
-    - If there are nothing interresting in the vectordatabase, use the tool search_on_web to search inforsmation on the web
-    - Be the most accurate as possible to the question
-                                  """
-    )
-    answer = llm_with_tools.invoke([system_prompt] + state["messages"])
-
-if __name__ == "__main__":
-    print(search_in_vectordb("Yankee"))
+email_graph.add_node("agent_answer", assistant_answer)
