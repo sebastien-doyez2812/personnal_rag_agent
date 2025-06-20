@@ -69,7 +69,7 @@ def search_in_vectordb(state: State, collection_name = "document_only", top_k = 
         limit = top_k
     )
 
-    if result["score"] > THRESHOLD : 
+    if result and result[0].score > THRESHOLD : 
         return {
             "data_to_used" : result,
             "not_in_db" : False
@@ -216,7 +216,7 @@ def search_on_web(state: State, nb_url: int = 3, timeout_loading: int = 5) -> Di
     
 def assistant_answer(state: State):
     prompt = f"""
-  As a helpful agent, which provide answer to the user 's question: {state["question"]}. 
+  As a helpful agent, which provide answer to the user 's question: {state["query"]}. 
   Use this data to answer correctly :{state["data_to_used"]}
   YOUR FINAL ANSWER MUST STRICTLY FOLLW THOSE RULES:
     - be the most ACCURATE as possible
@@ -281,7 +281,7 @@ if __name__ == "__main__":
     "query" : "How many at bats did the Yankee with the most walks in the 1977 regular season have that same season?",
     "not_in_db": None,
     "data_to_used": None, 
-    "messages": None,
+    "messages": [],
     "answer": None
     },
     config={"callbacks": [langfuse_handler]})
