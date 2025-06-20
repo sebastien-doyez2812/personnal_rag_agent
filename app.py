@@ -1,4 +1,4 @@
-import gradio, os
+import os, gradio as gr
 from langchain_ollama import ChatOllama
 from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
@@ -213,7 +213,7 @@ def assistant_answer(state: State):
     result = llm.invoke(message)
     print(result)
     return {
-        "answer" : result
+        "answer" : result.content
     }
 
 
@@ -263,13 +263,39 @@ langfuse_handler = CallbackHandler()
 langfuse_handler.auth_check()
 
 if __name__ == "__main__":
-    rag_result = compiled_rag_agent.invoke(
-        {
-    "query" : "How many at bats did the Yankee with the most walks in the 1977 regular season have that same season?",
-    "not_in_db": None,
-    "data_to_used": None, 
-    "messages": [],
-    "answer": None
-    },
-    config={"callbacks": [langfuse_handler]})
+    # with gr.Blocks() as demo:
+    #     gr.Markdown("Seb Doyez Personnal Rag Agent")
+    #     with gr.Row(equal_height= True):
+    #         text_box = gr.Textbox(lines = 5)
+    #         button = gr.Button(text = "Ask")
 
+    # demo.launch()
+
+#########################################
+##               Gradio                ##
+#########################################
+
+    def chat_interface(query, history):
+        init_state = {
+        "query" : query,
+        "not_in_db": None,
+        "data_to_used": None, 
+        "messages": [],
+        "answer": None
+        }
+        try:
+            rag_result = compiled_rag_agent.invoke(input= init_state, config= {"callbacks": [langfuse_handler]})
+            assistant_answer = rag_result["answer"]
+
+        except Exception as e:
+            assistant_answer = f"Error: {e}"
+        return assistant_answer
+
+    interface = gr.ChatInterface(
+        fn = chat_interface,
+        title = " Seb Doyez Rag Agent",
+        description= "Ask me anything, and I will search my knowledge base and on the web!",
+        theme = "soft"
+    )
+
+    interface.launch()
