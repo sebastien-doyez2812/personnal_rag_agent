@@ -263,19 +263,11 @@ langfuse_handler = CallbackHandler()
 langfuse_handler.auth_check()
 
 if __name__ == "__main__":
-    # with gr.Blocks() as demo:
-    #     gr.Markdown("Seb Doyez Personnal Rag Agent")
-    #     with gr.Row(equal_height= True):
-    #         text_box = gr.Textbox(lines = 5)
-    #         button = gr.Button(text = "Ask")
-
-    # demo.launch()
-
 #########################################
 ##               Gradio                ##
 #########################################
 
-    def chat_interface(query):#, history):
+    def chat_interface(query, history):
         init_state = {
         "query" : query,
         "not_in_db": None,
@@ -291,31 +283,10 @@ if __name__ == "__main__":
             assistant_answer = f"Error: {e}"
         return assistant_answer
 
-    # interface = gr.ChatInterface(
-    #     fn = chat_interface,
-    #     title = " Seb Doyez Rag Agent",
-    #     description= "Ask me anything, and I will search my knowledge base and on the web!",
-    #     theme = "soft"
-    # )
-
-
-    with gr.Blocks() as interface:
-        gr.Markdown("## Seb Doyez Personal RAG Agent")
-        with gr.Row(equal_height=True):
-            # Input Textbox for the user's query
-            text_box_input = gr.Textbox(lines=5, label="Your Question")
-            # Output Textbox for the agent's answer
-            text_box_output = gr.Textbox(lines=10, label="Agent's Answer", interactive=False)
-        
-            # Button to trigger the action
-            button = gr.Button(value="Ask Agent") # Changed text to value for clarity
-
-
-        button.click(
-            fn= chat_interface,
-            inputs=text_box_input,
-            outputs=text_box_output
-        )
-
-    print("Launching Gradio interface...")
+    interface = gr.ChatInterface(
+        fn = chat_interface,
+        title = " Seb Doyez Rag Agent",
+        description= "Ask me anything, and I will search my knowledge base and on the web!",
+        theme = "soft"
+    )
     interface.launch()
