@@ -263,14 +263,6 @@ langfuse_handler = CallbackHandler()
 langfuse_handler.auth_check()
 
 if __name__ == "__main__":
-    # with gr.Blocks() as demo:
-    #     gr.Markdown("Seb Doyez Personnal Rag Agent")
-    #     with gr.Row(equal_height= True):
-    #         text_box = gr.Textbox(lines = 5)
-    #         button = gr.Button(text = "Ask")
-
-    # demo.launch()
-
 #########################################
 ##               Gradio                ##
 #########################################
@@ -297,5 +289,4 @@ if __name__ == "__main__":
         description= "Ask me anything, and I will search my knowledge base and on the web!",
         theme = "soft"
     )
-
     interface.launch()
