@@ -22,7 +22,7 @@ import re
 ##           VECTORDB Qdrant         ##
 #######################################
 # Thresolhd similarity vector db:
-THRESHOLD = 0.85
+THRESHOLD = 0.05
 
 load_dotenv()
 qdrant_url = os.getenv("QDRANT_URL")
