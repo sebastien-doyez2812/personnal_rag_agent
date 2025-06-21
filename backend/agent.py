@@ -39,8 +39,8 @@ class RagAgent():
             self.__prompt = prompt
         else:
             self.__prompt = """
-                As a helpful agent, which provide answer to the user 's question: %s. 
-                Use this data to answer correctly : %s
+                As a helpful agent, which provide answer to the user 's question: {}. 
+                Use this data to answer correctly : {}
                 YOUR FINAL ANSWER MUST STRICTLY FOLLW THOSE RULES:
                     - be the most ACCURATE as possible
             """
@@ -91,7 +91,7 @@ class RagAgent():
         query = state["query"]
         result = self.__vector_db.search(query)
 
-        if result and result[0].score > self.threshold : 
+        if result and result[0].score > self.__threshold : 
             return {
                 "data_to_used" : result,
                 "not_in_db" : False
@@ -224,7 +224,7 @@ class RagAgent():
             }
         
     def __assistant_answer(self, state: State):
-        prompt = self.__prompt.format((state["query"], state["data_to_used"])) 
+        prompt = self.__prompt.format(state["query"], state["data_to_used"]) 
 
         message = [HumanMessage(content=prompt)]
         result = self.__llm.invoke(message)
