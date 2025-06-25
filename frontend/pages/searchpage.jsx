@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "../css/searchpage.css"
 
 function SearchPage(){
     const [query, setQuery] = useState('');
