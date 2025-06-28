@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend:
+    build: ./backend # Indique le chemin vers le Dockerfile du backend
+    ports:
+      - "8000:8000" # Mappe le port 8000 du conteneur au port 8000 de l'hôte
+    volumes:
+      - ./backend:/app/backend # Montage de volume pour le développement (optionnel)
+    # environment: # Si vous avez des variables d'environnement pour le backend
+    #   - SOME_ENV_VAR=value
+    restart: always # Redémarre le conteneur en cas d'échec
+
+  frontend:
+    build: ./frontend # Indique le chemin vers le Dockerfile du frontend
+    ports:
+      - "3000:80" # Mappe le port 80 du conteneur Nginx au port 3000 de l'hôte
+    volumes:
+      - ./frontend:/app/frontend # Montage de volume pour le développement (optionnel)
+    depends_on:
+      - backend # Assure que le backend démarre avant le frontend
+    restart: always # Redémarre le conteneur en cas d'échec
+    # environnement pour le frontend, si besoin d'indiquer l'URL du backend
+    # Par exemple, si votre frontend utilise une variable pour l'URL de l'API
+    # Remplacez cela par la manière dont votre application React gère les variables d'environnement
+    # (souvent via .env ou un script de build)
+    environment:
+      - REACT_APP_API_URL=http://localhost:8000/api # Pour les tests locaux, à adapter pour la production
