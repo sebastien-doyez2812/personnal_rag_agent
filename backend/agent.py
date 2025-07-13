@@ -28,10 +28,11 @@ class State(TypedDict):
     messages: Annotated[list[AnyMessage], add_messages]
 
     answer: str
+    path_img:str
 
 
 class RagAgent():
-    def __init__(self, vector_db: VectorDB, prompt: str =  None, use_langfuse: bool = True, llm_name: str = "qwen2.5", threshold: float = 0.5):
+    def __init__(self, vector_db: VectorDB, prompt: str =  None, use_langfuse: bool = True, llm_name: str = "qwen2.5", threshold: float = 0.4):
         # Settings of the agent:
         self.__llm = ChatOllama(model=llm_name)
         self.__vector_db = vector_db
@@ -98,7 +99,7 @@ class RagAgent():
         result_img[0]
         print(f"\n\nIMAGE/\n {result_img}\n\n")
         if result and result[0].score > self.__threshold : 
-            if result_img and result_img[0].score> 0.1:
+            if result_img and result_img[0].score> self.__threshold:
                 payload_content = result_img[0].payload['content']
                 print(payload_content)
                 match = re.search(r'path="([^"]+)"', payload_content)
@@ -267,10 +268,11 @@ class RagAgent():
         "not_in_db": None,
         "data_to_used": None, 
         "messages": [],
-        "answer": None
+        "answer": None,
+        "path_img": None
         }
         rag_result = self.__compiled_rag_agent.invoke(input= init_state, config= {"callbacks": self.__callbacks})
-        return rag_result["answer"]
+        return rag_result["answer"], rag_result["path_img"]
         
 
 ######################################
