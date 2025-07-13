@@ -88,9 +88,11 @@ class RagAgent():
     #########################################
 
     def __search_in_vectordb(self, state: State, collection_name = "document_only", top_k = 5):
+        print("[i] inside search in vectordb.")
+
         query = state["query"]
         result = self.__vector_db.search(query)
-
+        
         if result and result[0].score > self.__threshold : 
             return {
                 "data_to_used" : result,
@@ -116,6 +118,7 @@ class RagAgent():
                             Si rien n'est trouvé, 'data_to_used' contiendra un message d'erreur.
                             Sinon, il contiendra une liste de dictionnaires avec 'url', 'title' et 'content'.
         """
+        print("[i] inside search on web.")
         query = state["query"]
         found_urls_with_snippets = []
         web_content_results = []
