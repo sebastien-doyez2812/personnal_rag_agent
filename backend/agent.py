@@ -13,6 +13,7 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import re 
+import json
 
 from vectordb import VectorDB
 
@@ -92,8 +93,23 @@ class RagAgent():
 
         query = state["query"]
         result = self.__vector_db.search(query)
-        
+
+        result_img = self.__vector_db.search(query, collection_name= "image_only", top_k=1)
+        result_img[0]
+        print(f"\n\nIMAGE/\n {result_img}\n\n")
         if result and result[0].score > self.__threshold : 
+            if result_img and result_img[0].score> 0.1:
+                payload_content = result_img[0].payload['content']
+                print(payload_content)
+                match = re.search(r'path="([^"]+)"', payload_content)
+                if match:
+                    path = match.group(1)
+                    print(path)
+                    return {
+                        "path_img" : path,
+                        "data_to_used" : result,
+                        "not_in_db" : False
+                    }
             return {
                 "data_to_used" : result,
                 "not_in_db" : False
