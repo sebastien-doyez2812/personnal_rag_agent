@@ -6,6 +6,7 @@ function SearchPage(){
     const [response, setResponse] = useState(null);
     const [error, setError] = useState(null);
     const [loading, setLoading] = useState(false);
+    const [path_img, setPathIng] = useState(null);
     
     // Research function:
     const handleResearch = async (e) => {
@@ -23,6 +24,7 @@ function SearchPage(){
         setResponse(null);
         setError(null);
         setLoading(true);
+        setPathIng(null);
 
         try {
             const res = await fetch("http://127.0.0.1:8000/query", {
@@ -54,7 +56,9 @@ function SearchPage(){
             
             // else get the answer:
             const data = await res.json();
+            console.log("DATA IS", data)
             setResponse(data.response);
+            setPathIng(data.path_img);
         }
         catch(err) {
             console.log(err);
@@ -100,6 +104,13 @@ function SearchPage(){
                     </p>
                 </div>
 
+            )
+        }
+        {
+            path_img && (
+                <div className="Image">
+                    <img src={`http://127.0.0.1:8000${path_img}`} alt="" className="img_found" />
+                </div>
             )
         }
     </div>
