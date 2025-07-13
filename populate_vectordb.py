@@ -10,8 +10,9 @@ import tensorflow as tf
 
 load_dotenv()
 
-FOLDER_DOCS = "data\docs_only"
+FOLDER_DOCS = "data/text_desc_imgs_only" #"data\docs_only"
 COLLECTIONS = ["document_only", "image_only"]
+WHAT_COLLECTION = "image_only"
 
 # Get the Url and API for qdrant, from the .env file:
 qdrant_url = os.getenv("QDRANT_URL")
@@ -51,10 +52,10 @@ def extract_text_from_pdf(pdf_path):
 try:
     # Create the Collections:
     for collection in tqdm(COLLECTIONS) :
-        if not qdrant_client.collection_exists(collection_name = "document_only"):
+        if not qdrant_client.collection_exists(collection_name = collection):
             print(f"\033[93m Create collection {collection} \033[0m")
             qdrant_client.create_collection(
-                collection_name="document_only",
+                collection_name= collection,
                 vectors_config = models.VectorParams(size=384, distance = models.Distance.COSINE)
             )
             print(f"\033[92m Collection {collection} created! \033[0m")
@@ -89,7 +90,7 @@ try:
             )
             points_list.append(point)
     qdrant_client.upsert(
-        collection_name= "document_only",
+        collection_name= WHAT_COLLECTION,
         points= points_list
     )
     print("\033[92m Embedding Done! \033[0m")
