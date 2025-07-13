@@ -3,6 +3,7 @@ from qdrant_client.models import PointStruct
 from dotenv import load_dotenv
 from transformers import AutoTokenizer, TFAutoModel
 from tqdm import tqdm
+import fitz
 from fitz import open as fitz_open
 import os
 import tensorflow as tf
