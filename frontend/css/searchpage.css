@@ -103,3 +103,9 @@ button[type="submit"]:disabled {
   color: #164e63;
   white-space: pre-wrap; /* pour garder la mise en forme multi-lignes */
 }
+
+
+.img_found{
+  width: 600px;
+  height: 300px;
+}
