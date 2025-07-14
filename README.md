@@ -33,6 +33,7 @@ For this project, I used Langgraph, Qdrant as the VectorDB. This agent is advanc
 ## 📹 Youtue demo:
 
 I made a quick demo on this project:
+[click here for the video](https://www.youtube.com/watch?v=kwCLdQqM8bc)
 
 
 There are also a quick explanation about the architercture and the agent workflow.
